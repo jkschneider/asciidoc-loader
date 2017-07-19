@@ -14,3 +14,13 @@ it('requires includes and images', function() {
   loaded.should.containEql('require("!file-loader!./sunset.jpg")');
   loaded.should.containEql('require("!file-loader!./img/sunrise.jpg")');
 });
+
+it('supports positive line offset', function() {
+  var loaded = loader.bind({query: '?lineoffset=+1'})('= My Doc');
+  loaded.should.containEql('== My Doc');
+});
+
+it('supports negative line offset', function() {
+  var loaded = loader.bind({query: '?lineoffset=-1'})('== My Doc');
+  loaded.should.containEql('= My Doc');
+});
