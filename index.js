@@ -1,21 +1,17 @@
+var loaderUtils = require("loader-utils");
+
 // Works similarly to html-loader to cause React to pack adoc includes into the distribution
 // and replacing the include link with the packed file.
 
 module.exports = function(content) {
-  var params = (this.query || '').substring(1).split('&')
-    .reduce(function(map, p) {
-      var parts = p.split('=');
-      map[parts[0]] = parts[1];
-      return map;
-    }, {}) || {};
-
+  var params = loaderUtils.getOptions(this) || {};
   var contentAffectedByIncludeParameters = content;
 
-  var lineoffset = eval(params['lineoffset'] || 0);
-  if(lineoffset !== 0) {
+  var leveloffset = eval(params['leveloffset'] || 0);
+  if(leveloffset !== 0) {
     contentAffectedByIncludeParameters = content.replace(/^(=+)/g, function (_, offset) {
-      return lineoffset > 0 ?
-        offset + ''.padStart(lineoffset, '=') :
+      return leveloffset > 0 ?
+        offset + ''.padStart(leveloffset, '=') :
         offset.substring(-1 * offset);
     });
   }
@@ -26,9 +22,16 @@ module.exports = function(content) {
       return line.replace(/(image|include)::([^.]+).([^\[]+)\[(.*)\]/g,
         function (_, type, name, ext, importProps) {
           var loader = type === 'image' ? 'file-loader' : 'asciidoc-loader';
-          var require = '" + require("!' + loader + '!./' + name + '.' + ext + '") + "';
 
-          return type == 'image' ?
+          // combine the level offset coming to us from the parent adoc with the level offset specified on this include (if any)
+          var childLeveloffset = leveloffset + eval(loaderUtils.parseQuery('?' + importProps.replace(/,/g, '&'))['leveloffset'] || 0);
+          var query = type === 'include' ?
+            (childLeveloffset === 0 ? '' : '?leveloffset=' + (childLeveloffset > 0 ? '+' + childLeveloffset : childLeveloffset)) :
+            '';
+
+          var require = '" + require("!' + loader + query + '!./' + name + '.' + ext + '") + "';
+
+          return type === 'image' ?
             'image::' + require + '[' + importProps + ']' :
             require;
         })
