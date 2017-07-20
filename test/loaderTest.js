@@ -16,11 +16,11 @@ it('requires includes and images', function() {
 });
 
 it('supports positive line offset', function() {
-  var loaded = loader.bind({query: '?lineoffset=+1'})('= My Doc');
+  var loaded = loader.bind({query: '?leveloffset=+1'})('Some text\n= My Doc');
   loaded.should.containEql('== My Doc');
 });
 
 it('supports negative line offset', function() {
-  var loaded = loader.bind({query: '?leveloffset=-1'})('== My Doc');
+  var loaded = loader.bind({query: '?leveloffset=-1'})('Some text\n== My Doc');
   loaded.should.containEql('= My Doc');
 });

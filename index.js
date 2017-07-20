@@ -1,4 +1,4 @@
-var loaderUtils = require("loader-utils");
+var loaderUtils = require('loader-utils');
 
 // Works similarly to html-loader to cause React to pack adoc includes into the distribution
 // and replacing the include link with the packed file.
@@ -8,17 +8,19 @@ module.exports = function(content) {
   var contentAffectedByIncludeParameters = content;
 
   var leveloffset = eval(params['leveloffset'] || 0);
-  if(leveloffset !== 0) {
-    contentAffectedByIncludeParameters = content.replace(/^(=+)/g, function (_, offset) {
-      return leveloffset > 0 ?
-        offset + ''.padStart(leveloffset, '=') :
-        offset.substring(-1 * offset);
-    });
+  if (leveloffset !== 0) {
+    contentAffectedByIncludeParameters = content.split('\n').map(function (line) {
+      return line.replace(/^(=+)/g, function (_, offset) {
+        return leveloffset > 0 ?
+          offset + ''.padStart(leveloffset, '=') :
+          offset.substring(-1 * offset);
+      });
+    }).join('\n');
   }
 
-  return "module.exports = " + JSON.stringify(contentAffectedByIncludeParameters)
+  return 'module.exports = ' + JSON.stringify(contentAffectedByIncludeParameters)
     .split('\\n')
-    .map(function(line) {
+    .map(function (line) {
       return line.replace(/(image|include)::([^.]+).([^\[]+)\[(.*)\]/g,
         function (_, type, name, ext, importProps) {
           var loader = type === 'image' ? 'file-loader' : 'asciidoc-loader';
@@ -34,7 +36,7 @@ module.exports = function(content) {
           return type === 'image' ?
             'image::' + require + '[' + importProps + ']' :
             require;
-        })
+        });
     })
     .join('\\n');
 };
