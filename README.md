@@ -4,7 +4,7 @@ This is a Webpack loader that allows you to import Asciidoc `.adoc` files that
 contain include and image directives. The result is content that you can pass
 directly to asciidoctor.js.
 
-Currently, the `lineoffset` parameter of the include directive is supported, but
+Currently, the `leveloffset` parameter of the include directive is supported, but
 lines, tag, and indent are not. All parameters of the image directive are passed
 through to asciidoctor unchanged.
 
